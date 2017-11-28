@@ -21,6 +21,4 @@ public class PizzaOrderController {
         response.sendRedirect("/DeliveryInfo.html");
     }
 
-    @RequestMapping(value = "/AddressInfo")
-    public void finishOrder(@RequestParam String)
 }
