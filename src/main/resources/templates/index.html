@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"></meta>
+    <title>Order Form</title>
+</head>
+<body>
+
+<form method="get">
+    <h3>Order Pizza</h3>
+    <input th:each="${size}" type="radio" name="size" value="${size}"> <span th:text="${size}"></span> </input>
+    <br></br>
+</form>
+
+</body>
+</html>
