@@ -1,14 +1,20 @@
 package mk.ukim.finki.wp.web.lab03;
 
+import com.sun.org.apache.xpath.internal.operations.Or;
+import mk.ukim.finki.wp.web.lab03.model.Order;
 import mk.ukim.finki.wp.web.lab03.service.OrderService;
 import mk.ukim.finki.wp.web.lab03.service.PizzaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.constraints.Null;
+import java.time.LocalDate;
+import java.util.HashMap;
 
 
 /**
@@ -47,8 +53,57 @@ public class PizzaOrderController {
                                    HttpSession session) {
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("OrderOverview");
-        modelAndView.addObject("order", orderService.placeOrder(session.getAttribute("size").toString(),
-                clientName, clientAddress));
+        Order order = orderService.placeOrder(session.getAttribute("size").toString(),
+                clientName, clientAddress);
+
+        HashMap<Long, Order> hashMap = new HashMap<>();
+        if (session.getAttribute("orders") != null) {
+            hashMap = (HashMap<Long, Order>) session.getAttribute("orders");
+            hashMap.put(order.orderId, order);
+            session.setAttribute("orders", hashMap);
+        }
+        else {
+            hashMap.put(order.orderId, order);
+            session.setAttribute("orders", hashMap);
+        }
+
+        modelAndView.addObject("order", order);
         return modelAndView;
     }
+
+    @RequestMapping(value = "/vieworderbyid/{id}")
+    public ModelAndView viewOrderById(@PathVariable String id, HttpSession session) {
+        HashMap<Long, Order> hashMap = new HashMap<>();
+        hashMap = (HashMap<Long, Order>) session.getAttribute("orders");
+        Order order = hashMap.get(Long.parseLong(id));
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("OrderOverview");
+        modelAndView.addObject(order);
+        return modelAndView;
+    }
+
+    @RequestMapping(value = "/deleteorderbyid/{id}")
+    public ModelAndView deleteOrderById(@PathVariable String id, HttpSession session) {
+        HashMap<Long, Order> hashMap = new HashMap<>();
+        hashMap = (HashMap<Long, Order>) session.getAttribute("orders");
+        hashMap.remove(Long.parseLong(id));
+        session.setAttribute("orders", hashMap);
+
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("index");
+        modelAndView.addObject("size", pizzaService.getPizzaTypes());
+        return modelAndView;
+    }
+
+    @RequestMapping(value = "/deleteall")
+    public ModelAndView deleteAllOrders(HttpSession session) {
+        HashMap<Long, Order> hashMap = new HashMap<>();
+        session.setAttribute("orders", hashMap);
+
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("index");
+        modelAndView.addObject("size", pizzaService.getPizzaTypes());
+        return modelAndView;
+    }
+
 }
